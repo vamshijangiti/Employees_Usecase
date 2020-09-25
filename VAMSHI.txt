@@ -1,0 +1,79 @@
+
+
+---VAMSHI----
+
+
+create Database Employee
+
+use Employee
+
+---creating the department table
+
+create table dept(dno int primary key,dname varchar(10) not null,Location varchar(20) check(location in('IND','USA','US')))
+
+INSERT INTO dept VALUES(10,'ADMIN','IND')
+INSERT INTO dept VALUES(20,'STAFF','US')
+INSERT INTO dept VALUES(30,'HR','IND')
+INSERT INTO dept VALUES(40,'ADMIN','USA')
+INSERT INTO dept VALUES(50,'HR','US')
+INSERT INTO dept VALUES(70,'Clerk','USA')
+
+
+select * from dept
+
+---creating the emp table
+
+create Table emp(eid int unique not null,ename varchar(10) not null,salary int check(salary>=10000 and salary<=50000),dno int foreign key references dept(dno))
+
+insert into emp values(1,'vamshi',50000,10)
+insert into emp values(2,'Sriram',30000,20),(3,'Navya',45000,30),(4,'Akhila',45000,40),(5,'Amulya',35000,50)
+insert into emp values(6,'Manasa',30000,60)
+
+select * from emp
+
+
+--creating the Projects Table
+
+CREATE TABLE PROJECTS(PID INT PRIMARY KEY,PNAME VARCHAR(10) NOT NULL)
+INSERT INTO PROJECTS VALUES(100,'.NET')
+insert into PROJECTS values (101,'c#'),(102,'JAVA')
+insert into PROJECTS values (104,'HTML')
+insert into PROJECTS values (103,'ADO.net')
+
+
+select * from PROJECTS
+
+--creating the EmpProjects tables
+
+create table empProjects (EID int foreign key references emp(eid),PID int Foreign key references projects(pid))
+
+insert into empProjects values(1,100)
+insert into empProjects values (2,101),(8,102)
+insert into empProjects values (3,104)
+
+select * from empProjects
+
+
+---1st query--
+
+selecT * from emp e where dno  in (select dno from dept where dno=e.dno) 
+
+select * from dept where dno not in (select dno from EMP)
+
+select * from emp 
+select * from dept 
+
+---2nd Query-- 
+
+select e.ename,e.eid,e.dno,p.PID,p.PNAME from emp e, PROJECTS p where eid in 
+(select eid from empProjects where eid=e.eid and PID=p.PID)
+
+select * from empProjects
+
+---3rd Query--
+
+select dno,sum(salary) as TotalDeptSalary from emp group by dno 
+
+---4th Query--
+
+select dname from dept where dno not in (select dno from emp)
