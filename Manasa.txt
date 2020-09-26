@@ -45,3 +45,56 @@ CREATE TABLE EMPSPROJTABLE(EID INT FOREIGN KEY REFERENCES EMPS(EID),PID INT FORE
 INSERT INTO EMPSPROJTABLE VALUES(1,100)
 sp_help 'EMPSPROJTABLE'
 Select * from EMPSPROJTABLE
+
+
+--------------------------------------
+--1)List all the emp,depts Details which dept at least 1 or more employees.
+
+select EMPLOYEE.*,DPTS.* from EMPLOYEE,DPTS where EMPLOYEE.DEPTNO=DPTS.DEPTNO HAVING COUNT(EMPLOYEE.EID)>COUNT(DPTS.DEPTNO)
+
+-------------------------------------------------------------------------------
+--2)List all Emp,Project details which emp id match with project id.
+
+SELECT EMPLOYEE.*,PROJTABLE.* FROM EMPLOYEE,PROJTABLE WHERE EMPLOYEE.EID=PROJTABLE.PID
+
+-----------------------------------------------------------------------------------
+--3)To get total sum of salaries based on dept no wise.
+
+
+select DEPTNO,SUM(SALARY) AS TOTALSALARY FROM EMPLOYEE GROUP BY DEPTNO WITH ROLLUP
+
+----------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------
+
+--5)List  5Th minimum salary emp details using ‘n’ query method?
+
+SELECT * FROM EMP E
+WHERE 4=(SELECT COUNT(DISTINCT SALARY) FROM EMPLOYEE WHERE SALARY>E.SALARY)
+
+-----------------------------------------------------------------------------
+--6)List which emps two salaries are same.
+
+SELECT ENAME
+FROM EMPLOYEE 
+WHERE SALARY IN (SELECT SALARY FROM EMPLOYEE GROUP BY SALARY HAVING COUNT(*) > 1)
+
+------------------------------------------------------------------------------
+--7)Insert emp details using procedure if eid is unique,ename is not null,sal is more than 12000?
+
+create proc insertemp(@eid int, @ename varchar(10),@salary int )
+as
+begin
+begin transaction
+insert into emp(EID,ENAME,SALARY) VALUES (@eid,@ename,@salary)
+commit
+end
+exec insertemp 15,'Rikky',15000
+
+-----------------------------------------------------------------
+--8)List emp monthly salary,annual salary and save as “view”
+
+create view v as select emp.ENAME,emp.SALARY as monthlysalary,emp.SALARY*12 as annualsalary from emp 
+
+select * from v
+
+---------------------------------------------------------------------
