@@ -1,3 +1,154 @@
 ///////----------Manasa-----------////////
 
 
+--1)FIRST TABLE FOR EMPLOYEE
+
+CREATE TABLE EMPLOYEE(EID INT UNIQUE NOT NULL,ENAME VARCHAR(10) NOT NULL,SALARY INT CHECK(SALARY>=10000 and SALARY<=50000),DEPTNO INT FOREIGN KEY REFERENCES EMPS(DEPTNO))
+INSERT INTO EMPLOYEE VALUES(1,'Ammu',20000,10)                    --Inserting values into EMPLOYEE table
+INSERT INTO EMPLOYEE VALUES(2,'Manasa',10000,20)
+INSERT INTO EMPLOYEE VALUES(3,'Deekshitha',30000,30)
+INSERT INTO EMPLOYEE VALUES(4,'Gayathri',40000,30)
+INSERT INTO EMPLOYEE VALUES(5,'Keerthana',50000,40)
+INSERT INTO EMPLOYEE VALUES(6,'Dhanasri',35000,30)
+INSERT INTO EMPLOYEE VALUES(7,'Archana',45000,40)
+update EMPLOYEE set SALARY=20000 where EID=2
+
+sp_help 'EMPLOYEE'            --Description of EMPLOYEE table
+Select * from EMPLOYEE        --Displays the whole data in the table
+
+-------------------------------------------------------------------------------
+
+--2)SECOND TABLE FOR DPTS
+
+CREATE TABLE DPTS(DEPTNO INT PRIMARY KEY ,DNAME VARCHAR(10) NOT NULL,LOCATION VARCHAR(20) CHECK(LOCATION IN('IND','USA','UK')))  --Creating table named DPTS
+INSERT INTO DPTS VALUES(10,'ADMIN','IND')  --Inserting values into DPTS table
+INSERT INTO DPTS VALUES(20,'HR','UK')
+INSERT INTO DPTS VALUES(30,'STAFF','IND')
+INSERT INTO DPTS VALUES(40,'ADMIN','USA')
+INSERT INTO DPTS VALUES(50,'HR','UK')
+INSERT INTO DPTS VALUES(60,'STAFF','USA')
+INSERT INTO DPTS VALUES(70,'HR','UK')
+
+sp_help 'DPTS'        --Desciption of DPTS table
+Select * from DPTS    --Displays the whole data in the table
+
+--------------------------------------------------------------------------
+
+
+--3)THIRD TABLE FOR PROJTABLE
+
+CREATE TABLE PROJTABLE(PID INT PRIMARY KEY,PNAME VARCHAR(10) NOT NULL)         --Creating table called PROJTABLE
+INSERT INTO PROJTABLE VALUES(100,'DOTNET')                                    --Inserting values into PROJTABLE 
+INSERT INTO PROJTABLE VALUES(1,'SQL')
+
+sp_help 'PROJTABLE'                --Desciption of PROJTABLE table
+Select * from PROJTABLE               --Displays the whole data in the table
+
+-------------------------------------------------------------------------------------------
+
+--4)FOURTH TABLE FOR EMPSPROJTABLE
+
+CREATE TABLE EMPSPROJTABLE(EID INT FOREIGN KEY REFERENCES EMPS(EID),PID INT FOREIGN KEY REFERENCES PROJTABLE(PID))  --Creating table named EMPSPROJTABLE
+INSERT INTO EMPSPROJTABLE VALUES(1,100)                 --Inserting values into table
+
+sp_help 'EMPSPROJTABLE'                 --Desciption of EMPSPROJTABLE table
+Select * from EMPSPROJTABLE            --Displays the whole data in the table
+
+
+-------------------------------------------------------------------------------------
+
+--1)List all the emp,depts Details which dept at least 1 or more employees.
+
+---select EMPLOYEE.*,DPTS.* from EMPLOYEE,DPTS where EMPLOYEE.DEPTNO=DPTS.DEPTNO HAVING COUNT(EMPLOYEE.EID)>COUNT(DPTS.DEPTNO)
+
+------------------------------------------------------------------------------------------------
+--2)List all Emp,Project details which emp id match with project id.
+
+SELECT EMPLOYEE.*,PROJTABLE.* FROM EMPLOYEE,PROJTABLE WHERE EMPLOYEE.EID=PROJTABLE.PID
+
+------------------------------------------------------------------------------------------------------
+--3)To get total sum of salaries based on dept no wise.
+
+
+select DEPTNO,SUM(SALARY) AS TOTALSALARY FROM EMPLOYEE GROUP BY DEPTNO WITH ROLLUP
+
+----------------------------------------------------------------------------------
+
+--4)Which dept does not exists any employee those details?
+
+select DNAME from DPTS where DEPTNO not in (select DEPTNO from EMPLOYEE)
+
+
+-------------------------------------------------------------------------------------
+
+--5)List  5Th minimum salary emp details using ‘n’ query method?
+
+SELECT * FROM EMP E
+WHERE 4=(SELECT COUNT(DISTINCT SALARY) FROM EMPLOYEE WHERE SALARY>E.SALARY)
+
+----------------------------------------------------------------------------------------------------
+--6)List which emps two salaries are same.
+
+SELECT ENAME
+FROM EMPLOYEE 
+WHERE SALARY IN (SELECT SALARY FROM EMPLOYEE GROUP BY SALARY HAVING COUNT(*) > 1)
+
+---------------------------------------------------------------------------------------------------
+--7)Insert emp details using procedure if eid is unique,ename is not null,sal is more than 12000?
+
+CREATE PROC PCI(@EID INT,@ENAME VARCHAR(10),@SALARY INT )   -- PROCEDURE NAMED AS PC
+AS
+BEGIN
+SET NOCOUNT ON                               -- DOESNOT DISPLAYS ROWS INSERTED 
+DECLARE @I INT
+SELECT @I =COUNT(*)FROM EMPLOYEE WHERE EID=@EID
+IF @EID=0 
+PRINT 'CANT INSERT NULL VALUE INTO EID'
+ELSE IF @I>0                                 -- CHECKS @I>0
+PRINT 'EID ALREADY EXISTS'
+ELSE IF @ENAME IS NULL                       -- CHECKS ENAME COLOUMN IS NULL
+PRINT 'CANT INSERT NULL VALUE INTO ENAME'
+ELSE IF @SALARY<12000                        -- CHECKS CONDITION WHERE SALARY <12000
+PRINT 'SALARY SHOULD BE GREATER THAN 12000' 
+ELSE
+BEGIN
+INSERT INTO EMPLOYEE(EID,ENAME,SALARY) VALUES(@EID,@ENAME,@SALARY)
+PRINT 'RECORD INSERTED SUCCESSFULLY'
+END
+END
+EXEC PCI 1000,'Manasa',14000  -- RECORD INSERTED SUCCESSFULLY
+EXEC PCI 1111,'Rikky',300 -- CANT INSERT SALARY SHOULD BE GREATER THAN 12000
+EXEC PCI 106,'Keerthana',400 -- CANT INSERT SALARY SHOULD BE GREATER THAN 12000
+EXEC PCI 1010,NULL,12999  -- CANT INSERT NULL VALUE INTO ENAME
+EXEC PCI 2,'Ammu',12111  --- EID 2 ALREADY EXISTS
+
+-----------------------------------------------------------------------------------------------------
+--8)List emp monthly salary,annual salary and save as “view”
+
+create view v as select emp.ENAME,emp.SALARY as monthlysalary,emp.SALARY*12 as annualsalary from emp 
+
+select * from v
+
+-----------------------------------------------------------------------------------------------------
+
+----9)Create one new emptable in that to store inserted,deleted details using trigger.
+
+------------------------------------------------------------------------------------------------------------
+
+--10)To make tax() function for given salary with 13%.
+
+create function tax(@SALARY int)    --Creating function called tax
+returns float
+as
+begin
+set @SALARY=@SALARY+(@SALARY*0.13)     --Calculating tax
+return @SALARY
+end
+select dbo.tax(5000)                    --Selecting result
+
+
+
+
+
+
+
