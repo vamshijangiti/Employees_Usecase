@@ -40,6 +40,10 @@ Select * from DPTS    --Displays the whole data in the table
 CREATE TABLE PROJTABLE(PID INT PRIMARY KEY,PNAME VARCHAR(10) NOT NULL)         --Creating table called PROJTABLE
 INSERT INTO PROJTABLE VALUES(100,'DOTNET')                                    --Inserting values into PROJTABLE 
 INSERT INTO PROJTABLE VALUES(1,'SQL')
+INSERT INTO PROJTABLE VALUES(120,'JAVA')
+INSERT INTO PROJTABLE VALUES(130,'C++')
+INSERT INTO PROJTABLE VALUES(140,'C')
+INSERT INTO PROJTABLE VALUES(150,'PYTHON')
 
 sp_help 'PROJTABLE'                --Desciption of PROJTABLE table
 Select * from PROJTABLE               --Displays the whole data in the table
@@ -49,7 +53,10 @@ Select * from PROJTABLE               --Displays the whole data in the table
 --4)FOURTH TABLE FOR EMPSPROJTABLE
 
 CREATE TABLE EMPSPROJTABLE(EID INT FOREIGN KEY REFERENCES EMPS(EID),PID INT FOREIGN KEY REFERENCES PROJTABLE(PID))  --Creating table named EMPSPROJTABLE
-INSERT INTO EMPSPROJTABLE VALUES(1,100)                 --Inserting values into table
+INSERT INTO EMPSPROJTABLE VALUES(1,100)  --Inserting values into table
+INSERT INTO EMPSPROJTABLE VALUES(2,120)
+INSERT INTO EMPSPROJTABLE VALUES(3,130)
+INSERT INTO EMPSPROJTABLE VALUES(5,150)
 
 sp_help 'EMPSPROJTABLE'                 --Desciption of EMPSPROJTABLE table
 Select * from EMPSPROJTABLE            --Displays the whole data in the table
