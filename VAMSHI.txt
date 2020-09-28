@@ -1,14 +1,9 @@
 
-
----VAMSHI----
-
-
 create Database Employee
 
 use Employee
 
 ---creating the department table
-
 create table dept(dno int primary key,dname varchar(10) not null,Location varchar(20) check(location in('IND','USA','US')))
 
 INSERT INTO dept VALUES(10,'ADMIN','IND')
@@ -55,7 +50,6 @@ select * from empProjects
 
 
 ---1st query--
-
 selecT * from emp e where dno  in (select dno from dept where dno=e.dno) 
 
 select * from dept where dno not in (select dno from EMP)
@@ -65,8 +59,7 @@ select * from dept
 
 ---2nd Query-- 
 
-select e.ename,e.eid,e.dno,p.PID,p.PNAME from emp e, PROJECTS p where eid in 
-(select eid from empProjects where eid=e.eid and PID=p.PID)
+select e.ename,e.eid,e.dno,p.PID,p.PNAME from emp e, PROJECTS p where eid in (select eid from empProjects where eid=e.eid and PID=p.PID)
 
 select * from empProjects
 
@@ -77,3 +70,96 @@ select dno,sum(salary) as TotalDeptSalary from emp group by dno
 ---4th Query--
 
 select dname from dept where dno not in (select dno from emp)
+
+---5th Query--
+--nth Query--
+select * from emp e where 3=(select count (distinct salary) as minsalary from emp where salary<e.salary)
+
+select salary from emp order by salary
+
+--6th Query--
+--self Join--
+
+select distinct  e.salary,e.ename from emp e ,emp r where e.salary=r.salary and e.eid!=r.eid
+
+select * from emp
+
+
+
+--7th Query--
+
+alter procedure p2 (@eid int,@ename varchar(20),@sal int,@dno int)
+as 
+begin
+set nocount on
+    DECLARE @I INT,@J INT
+    SELECT @I=COUNT(*) FROM EMP WHERE eid=@eid
+	select @j=count(*) from emp where dno=@dno
+if(@I>0)
+	print 'eid should be unique '
+else if(@j=0)
+	print 'deptno not exists'
+else if (@ename is  null)
+	print 'ename should not be null'
+else if (@sal>12000)
+	begin
+		insert into emp values (@eid,@ename,@sal,@dno)
+		print 'record inserted Successfully'
+	end
+else
+print 'salary should be greater than 12000'
+end
+
+
+exec p2 10,nani,12001,30
+exec p2 11,pallavi,41000,20
+
+select name from sysobjects where xtype='p'
+
+select * from emp
+
+
+
+---8th Query--
+
+Create view v1 as select salary,(salary*12) as yearlysal from emp
+
+alter view v1 as select salary,(salary*12) as yearlysalary from emp
+
+select * from v1
+
+sp_help v1
+
+select name from sysobjects where xtype='v'
+
+
+--9th Query--
+
+
+
+
+--10 Query--
+
+
+alter function f1(@sal int)
+returns float
+as 
+begin
+declare @tax float
+set @tax=@sal-(@sal*0.13)
+return @tax
+end
+
+select dbo.f1(50000)
+
+create function tax(@eno int)
+returns table
+as
+return (select eid,ENAME,salary*12 as yearlysal,(salary-(salary*0.13)) as TAX  from EMP where eid=@eno )
+
+select * from dbo.tax(1)
+
+
+select name from sysobjects where xtype='fn'
+
+
