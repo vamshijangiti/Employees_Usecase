@@ -59,7 +59,10 @@ Select * from EMPSPROJTABLE            --Displays the whole data in the table
 
 --1)List all the emp,depts Details which dept at least 1 or more employees.
 
----select EMPLOYEE.*,DPTS.* from EMPLOYEE,DPTS where EMPLOYEE.DEPTNO=DPTS.DEPTNO HAVING COUNT(EMPLOYEE.EID)>COUNT(DPTS.DEPTNO)
+SELECT *FROM EMPLOYEE E WHERE DEPTNO IN(SELECT DEPTNO FROM DPTS WHERE DEPTNO=E.DEPTNO)
+SELECT *FROM EMPLOYEE
+SELECT *FROM DPTS WHERE DEPTNO NOT IN(SELECT DEPTNO FROM EMPLOYEE)
+SELECT *FROM DPTS
 
 ------------------------------------------------------------------------------------------------
 --2)List all Emp,Project details which emp id match with project id.
