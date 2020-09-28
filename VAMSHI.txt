@@ -118,8 +118,6 @@ select name from sysobjects where xtype='p'
 
 select * from emp
 
-
-
 ---8th Query--
 
 Create view v1 as select salary,(salary*12) as yearlysal from emp
@@ -130,17 +128,47 @@ select * from v1
 
 sp_help v1
 
+--To get all the views
 select name from sysobjects where xtype='v'
-
 
 --9th Query--
 
 
+CREATE TABLE empt(EID INT,ENAME VARCHAR(10) NOT NULL,SALARY INT CHECK (SALARY BETWEEN 10000 AND 50000),DNO INT)
+SELECT *FROM empt
+
+---Trigger for Inserting The Records
+
+CREATE TRIGGER tr
+ON EMP
+FOR INSERT
+AS
+BEGIN
+INSERT INTO empt SELECT EID,ENAME,SALARY,DNO FROM INSERTED  
+END
+INSERT INTO EMP(EID,ENAME,SALARY,DNO) VALUES(1,'john',30000,10) 
+INSERT INTO EMP(EID,ENAME,SALARY,DNO) VALUES(134,'hary',25000,10)
+SELECT *FROM EMP
+
+
+CREATE TABLE EMP3(EID INT,ENAME VARCHAR(10) NOT NULL,SALARY INT CHECK(SALARY BETWEEN 10000 AND 50000),DNO INT)
+SELECT *FROM EMP3
+
+--Trigger for Deleting the Records
+CREATE TRIGGER TR5 
+ON EMP
+FOR DELETE
+AS
+BEGIN
+INSERT INTO EMP3 SELECT EID,ENAME,SALARY,DNO FROM DELETED
+END
+DELETE FROM EMP WHERE EID=134 
+SELECT *FROM EMP  
 
 
 --10 Query--
 
-
+---Scalar Function
 alter function f1(@sal int)
 returns float
 as 
@@ -152,6 +180,7 @@ end
 
 select dbo.f1(50000)
 
+---tabular function
 create function tax(@eno int)
 returns table
 as
@@ -159,7 +188,7 @@ return (select eid,ENAME,salary*12 as yearlysal,(salary-(salary*0.13)) as TAX  f
 
 select * from dbo.tax(1)
 
-
+--for getting all the functions 
 select name from sysobjects where xtype='fn'
 
 
