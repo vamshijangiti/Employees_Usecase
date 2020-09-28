@@ -77,6 +77,7 @@ select * from emp e where 3=(select count (distinct salary) as minsalary from em
 
 select salary from emp order by salary
 
+
 --6th Query--
 --self Join--
 
@@ -130,6 +131,7 @@ sp_help v1
 
 --To get all the views
 select name from sysobjects where xtype='v'
+
 
 --9th Query--
 
