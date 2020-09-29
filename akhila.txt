@@ -1,7 +1,7 @@
 create database casestudy
 use casestudy
 
-
+--creating the employee table 
 CREATE TABLE EMPS(EID INT UNIQUE NOT NULL,ENAME VARCHAR(10) NOT NULL,SALARY INT CHECK(SALARY>=10000 and SALARY<=50000),DEPTNO INT foreign KEY references dpts(DEPTNO))
 
 INSERT INTO EMPS VALUES(1,'Navya',20000,10)
@@ -12,9 +12,10 @@ INSERT INTO EMPS VALUES(5,'Spandana',50000,40)
 INSERT INTO EMPS VALUES(6,'Vamshi',50000,70)
 INSERT INTO EMPS VALUES(7,'Akhila',25000,60)
 
-sp_help 'emps'
-Select * from EMPS
+sp_help 'emps'        --returns the body of the table
+Select * from EMPS    --getting all the details of the emps
 
+--creating the department table
 CREATE TABLE DPTS(DEPTNO INT primary key,DNAME VARCHAR(10) NOT NULL,LOCATION VARCHAR(20) CHECK(LOCATION IN('IND','USA','UK')))
 
 INSERT INTO DPTS VALUES(10,'ADMIN','IND')
@@ -30,7 +31,7 @@ INSERT INTO DPTS VALUES(90,'HR','USa')
 sp_help 'DPTS'
 Select * from DPTS
 
-
+--creating the project table 
 CREATE TABLE PROJTABLE(PID INT PRIMARY KEY,PNAME VARCHAR(10) NOT NULL)
 
 INSERT INTO PROJTABLE VALUES(100,'DOTNET')
@@ -42,7 +43,7 @@ INSERT INTO PROJTABLE VALUES(500,'c++')
 sp_help 'PROJTABLE'
 Select * from PROJTABLE
 
-
+--creating the employees project table 
 CREATE TABLE EMPSPROJTABLE(EID INT FOREIGN KEY REFERENCES EMPS(EID),PID INT FOREIGN KEY REFERENCES PROJTABLE(PID))
 
 INSERT INTO EMPSPROJTABLE VALUES(1,100)
@@ -56,44 +57,40 @@ sp_help 'EMPSPROJTABLE'
 Select * from EMPSPROJTABLE
 
 --ques no:1
-SELECT * FROM EMPS E,DPTS D WHERE EXISTS(SELECT 1 FROM DPTS,EMPS WHERE D.DEPTNO=E.DEPTNO)
-
+SELECT * FROM EMPS E,DPTS D WHERE EXISTS(SELECT 1 FROM DPTS,EMPS WHERE D.DEPTNO=E.DEPTNO)--by using alias names we are getting all the details of emp and dept which dept exists atleast one emp 
 --ques no:2
 SELECT E.EID,E.ENAME,E.DEPTNO,P.PID,P.PNAME FROM EMPS E,PROJTABLE P WHERE EID IN
-(SELECT EID FROM EMPSPROJTABLE WHERE EID=E.EID AND PID=P.PID)
-
+(SELECT EID FROM EMPSPROJTABLE WHERE EID=E.EID AND PID=P.PID)--- getting all the details of emp and projects table by checking eid in and using empsprojectable we are matching the eid and pid
 --ques no:3
-SELECT DEPTNO,SUM(SALARY) AS TOTAL_SALARY FROM EMPS GROUP BY DEPTNO
-
+SELECT DEPTNO,SUM(SALARY) AS TOTAL_SALARY FROM EMPS GROUP BY DEPTNO---by using aggregate function we are getting sum of Sal and to get the dept number wise we are using group by
 --quesno:4
-SELECT * FROM DPTS WHERE DEPTNO NOT IN(SELECT DEPTNO FROM EMPS)
-
+SELECT * FROM DPTS WHERE DEPTNO NOT IN(SELECT DEPTNO FROM EMPS)--by using not in operator we are getting the details of dept which does not exists in employee details
 --quesno:5
-SELECT * FROM EMPS E WHERE 4=(SELECT COUNT(DISTINCT SALARY) FROM EMPS WHERE SALARY<E.SALARY)
+SELECT * FROM EMPS E WHERE 4=(SELECT COUNT(DISTINCT SALARY) FROM EMPS WHERE SALARY<E.SALARY)---by using n query method we are getting the 4th minimum salary from the employees
 
 --ques no:6
-SELECT * FROM EMPS E WHERE 1<(SELECT COUNT(SALARY) FROM EMPS WHERE SALARY=E.SALARY)
+SELECT * FROM EMPS E WHERE 1<(SELECT COUNT(SALARY) FROM EMPS WHERE SALARY=E.SALARY)---we are using count function for salary from emps when both salaries shaould be same 
 
 --ques no:7
-CREATE PROC IREC(@EID INT,@ENA VARCHAR(20),@SAL INT,@DNO INT)
+CREATE PROC IREC(@EID INT,@ENA VARCHAR(20),@SAL INT,@DNO INT)---creating a proc to insert a values to emp
 AS
 BEGIN
- SET NOCOUNT ON
+ SET NOCOUNT ON  
     DECLARE @I INT,@J INT
     SELECT @I=COUNT(*) FROM EMPS WHERE EID=@EID
     SELECT @J=COUNT(*) FROM DPTS WHERE DEPTNO=@DNO
-    IF  @I>0
-       PRINT 'EMPLOYEE ALREADY EXISTS'
-	ELSE IF @ENA IS  NULL
+    IF  @I>0 --if eid was greater than 0 then employee id already exists
+       PRINT 'EMPLOYEE ALREADY EXISTS'         
+	ELSE IF @ENA IS  NULL ---if ename is null we cant insert a null values
        PRINT 'CANT INSERT NULL VALUE INTO EMPNAME'
-    ELSE IF @J=0
+    ELSE IF @J=0   --if deptno is equal to 0 then it was a invalid number
        PRINT 'INVALID DEPTNO'
-    ELSE IF @SAL>12000
+    ELSE IF @SAL>12000  --if salary was greater than 12000 then it was valid salary otherwise invalid
        PRINT 'VALID SALARY'
     ELSE
 	   PRINT 'INVALID SALARY' 
     BEGIN
-	    INSERT INTO EMPS VALUES(@EID,@ENA,@SAL,@DNO)
+	    INSERT INTO EMPS VALUES(@EID,@ENA,@SAL,@DNO)--if it satifies all these conditions then we can insert all these values to the emps table
 	    PRINT 'RECORD INSERTED SUCCESSFULLY'
     END
 END
@@ -101,18 +98,18 @@ END
 		EXEC IREC 20,NULL,25000,30 
 
 --ques 8
-CREATE VIEW V1 AS SELECT ENAME,SALARY,(SALARY*12) AS ANNSAL FROM EMPS
-SELECT * FROM V1
+CREATE VIEW V1 AS SELECT ENAME,SALARY,(SALARY*12) AS ANNSAL FROM EMPS   -- craeting a view by selecting ename,salary,and by making salary*12 then it becomes annsal then getting these values from the emps table
+SELECT * FROM V1        --getting the view details 
 
 --ques 9
 CREATE TABLE EMPLOYEE(EID INT,ENAME VARCHAR(10) NOT NULL,SALARY INT CHECK (SALARY BETWEEN 10000 AND 50000),DEPTNO INT) --APPLYING CONSTRAINTS
 SELECT *FROM EMPLOYEE
-CREATE TRIGGER TR
-ON EMPS
+CREATE TRIGGER TR  --creation of trigger by using trigger name 'tr'
+ON EMPS             --on table name
 FOR INSERT
 AS
 BEGIN
-INSERT INTO EMPLOYEE SELECT EID,ENAME,SALARY,DEPTNO FROM INSERTED  
+INSERT INTO EMPLOYEE SELECT EID,ENAME,SALARY,DEPTNO FROM INSERTED  --inserting the values to emp here,inserted is a temporaily created table
 END
        INSERT INTO EMPS(EID,ENAME,SALARY,DEPTNO) VALUES(11,'NANI',30000,60) 
        SELECT *FROM EMPS
@@ -120,24 +117,24 @@ END
 CREATE TABLE EMP1(EID INT,ENAME VARCHAR(10) NOT NULL,SALARY INT CHECK(SALARY BETWEEN 10000 AND 50000),DEPTNO INT)
 SELECT *FROM EMP1
 
-CREATE TRIGGER TR2
+CREATE TRIGGER TR2  --trigger named as tr2
 ON EMPS
 FOR DELETE
 AS
 BEGIN
-INSERT INTO EMP1 SELECT EID,ENAME,SALARY,DEPTNO FROM DELETED
+INSERT INTO EMP1 SELECT EID,ENAME,SALARY,DEPTNO FROM DELETED  -- deleting the values from emps 
 END 
           DELETE FROM EMPS WHERE EID=10  
           SELECT *FROM EMPS   
 
 --QUES 10
-CREATE FUNCTION TAXFUN(@SAL INT)
-RETURNS FLOAT
+CREATE FUNCTION TAXFUN(@SAL INT)  --creating the function by using taxfun name
+RETURNS FLOAT  ---returns the float datatype
 AS
 BEGIN
-SET @SAL=@SAL-(@SAL*0.13)
+SET @SAL=@SAL-(@SAL*0.13)   --calculating salary with 13% tax
 RETURN @SAL
 END          
-           SELECT DBO.TAXFUN(20000)
+           SELECT DBO.TAXFUN(20000)                 --dbo is database owner with extension of function name
            SELECT DBO.TAXFUN(SALARY) FROM EMPS
 		   
