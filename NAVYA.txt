@@ -1,0 +1,124 @@
+--FIRST TABLE FOR DPTS
+
+CREATE TABLE DPTS(DEPTNO INT PRIMARY KEY,DNAME VARCHAR(10) NOT NULL,LOCATION VARCHAR(20) CHECK(LOCATION IN('IND','USA','UK')))
+INSERT INTO DPTS VALUES(10,'ADMIN','IND')
+INSERT INTO DPTS VALUES(20,'HR','UK')
+INSERT INTO DPTS VALUES(30,'STAFF','IND')
+INSERT INTO DPTS VALUES(40,'ADMIN','USA')
+INSERT INTO DPTS VALUES(50,'HR','UK')
+sp_help 'DPTS'
+Select * from DPTS
+
+--SECOND TABLE FOR EMPS
+
+CREATE TABLE EMPS(EID INT UNIQUE NOT NULL,ENAME VARCHAR(10) NOT NULL,SALARY INT CHECK(SALARY>=10000 and SALARY<=50000),DEPTNO INT FOREIGN KEY REFERENCES DPTS(DEPTNO))
+INSERT INTO EMPS VALUES(1,'Navya',20000,10)
+INSERT INTO EMPS VALUES(2,'Akhila',10000,20)
+INSERT INTO EMPS VALUES(3,'Pallavi',30000,30)
+INSERT INTO EMPS VALUES(4,'Amulya',40000,40)
+INSERT INTO EMPS VALUES(5,'Manasa',50000,50)
+sp_help 'emps'
+Select * from EMPS
+
+
+--THIRD TABLE FOR PROJTABLE
+
+CREATE TABLE PROJTABLE(PID INT PRIMARY KEY,PNAME VARCHAR(10) NOT NULL)
+INSERT INTO PROJTABLE VALUES(100,'DOTNET')
+INSERT INTO PROJECTTABLE VALUES(101,'C')
+sp_help 'PROJTABLE'
+Select * from PROJTABLE
+
+--FOURTH TABLE FOR EMPSPROJTABLE
+
+CREATE TABLE EMPSPROJTABLE(EID INT FOREIGN KEY REFERENCES EMPS(EID),PID INT FOREIGN KEY REFERENCES PROJTABLE(PID))
+INSERT INTO EMPSPROJTABLE VALUES(1,100)
+INSERT INTO EMPSPROJTABLE VALUES(2,101)
+sp_help 'EMPSPROJTABLE'
+Select * from EMPSPROJTABLE
+
+--1st QUERY
+select emps.*,dpts.dname,dpts.location from emps,dpts
+ where emps.deptno in(select deptno from emps group by emps.deptno having count(emps.deptno)>=1  and emps.deptno=dpts.DEPTNO )
+
+
+
+--2nd QUERY
+select e.ename,e.eid,e.deptno,p.pid,p.pnmae from emps e, projtable p where eid in
+(select eid from empsProjtable where eid=e.eid and pid=p.pid)
+
+--3rd query
+select deptno,sum(salary)  from emps group by deptno
+
+--4th query
+select dname from dpts d where not exists (select deptno from emps where deptno=d.deptno)
+
+--5th query
+select * from emps e where 4=(select count (distinct salary)from emps where salary<e.salary)
+select salary from emps order by salary
+
+--6th query
+select e.ename,e.salary from emps e where salary in (select salary from emps where eid!=e.eid)
+
+--7th query
+create proc emp(@eid INT,@ename varchar(15),@salary int)
+as
+begin
+declare @a int
+select @a=count(*) from emps where eid=@eid
+if @salary > 12000 and @a=0 and @ename !=''
+	insert into emps(eid,ename,salary) values(@eid,@ename,@salary)
+else
+	print 'enter valid '
+
+end
+--8th query
+
+create view v1
+as select ename,salary,salary*12 as annualsalary from emps
+select *from v1
+
+--9th query
+
+CREATE TABLE EMP2(EID INT,ENAME VARCHAR(10) NOT NULL,SALARY INT CHECK (SALARY BETWEEN 10000 AND 50000),DNO INT) --APPLYING CONSTRAINTS
+SELECT *FROM EMP2
+CREATE TRIGGER TR4 -- TRIGGER NAMED TR4
+ON EMPS
+FOR INSERT
+AS
+BEGIN
+INSERT INTO EMP2 SELECT EID,ENAME,SALARY,DNO FROM INSERTED  
+END
+INSERT INTO EMPS(EID,ENAME,SALARY,DNO) VALUES(133,'ABHIMANYU',30000,10) --INSERTING VALUES INTO NAMED 4 COLOUMNS
+INSERT INTO EMPS(EID,ENAME,SALARY,DNO) VALUES(134,'ABHIJIT',25000,10) -- INSERTING VALUES INTO NAMED 4 COLOUMNS
+SELECT *FROM EMPS
+
+CREATE TABLE EMP3(EID INT,ENAME VARCHAR(10) NOT NULL,SALARY INT CHECK(SALARY BETWEEN 10000 AND 50000),DNO INT)
+SELECT *FROM EMP3
+CREATE TRIGGER TR5  -- TRIGGER NAMED TR5
+ON EMPS
+FOR DELETE
+AS
+BEGIN
+INSERT INTO EMP3 SELECT EID,ENAME,SALARY,DNO FROM DELETED
+END
+DELETE FROM EMPS WHERE EID=134  -- DELETES  EID RECORD
+SELECT *FROM EMPS   -- RETRIEVE EMPS DETAILS
+
+
+--10th query
+
+create function tax(@eid int)
+returns float
+as
+begin
+declare @j float,@c int
+SELECT @j=salary FROM emps WHERE eid=@eid
+set @c=@j*0.13
+return @j-@c
+end
+
+declare @a int
+set @a= dbo.tax(1)
+print @a 
+
