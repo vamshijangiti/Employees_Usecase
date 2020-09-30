@@ -24,7 +24,9 @@ insert into emp values(1,'vamshi',50000,10)
 insert into emp values(2,'Sriram',30000,20),(3,'Navya',45000,30),(4,'Akhila',45000,40),(5,'Amulya',35000,50)
 insert into emp values(6,'Manasa',30000,60)
 
-select * from emp
+select * from emp'
+--To get the desciption of table
+sp_help 'EMPLOYEE'
 
 
 --creating the Projects Table
