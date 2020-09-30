@@ -50,6 +50,9 @@ select * from empProjects
 
 
 ---1st query--
+
+-- LIST ALL EMPS,DEPTS DETAILS WHICH DEPT HAS ATLEAST 1 OR MORE EMPLOYEES
+
 selecT * from emp e where dno  in (select dno from dept where dno=e.dno) 
 
 select * from dept where dno not in (select dno from EMP)
@@ -57,28 +60,40 @@ select * from dept where dno not in (select dno from EMP)
 select * from emp 
 select * from dept 
 
----2nd Query-- 
+---2nd Query---------------------------------------------------------------------------------------------------------------
+
+ --LIST ALL EMP,PROJECTS DETAILS WHERE EMPID MATCHES WITH PID
 
 select e.ename,e.eid,e.dno,p.PID,p.PNAME from emp e, PROJECTS p where eid in (select eid from empProjects where eid=e.eid and PID=p.PID)
 
 select * from empProjects
 
----3rd Query--
+---3rd Query---------------------------------------------------------------------------------------------------------------
+
+--TO GET TOTAL SUM OF SALARIES BASED ON DEPTNO WISE
 
 select dno,sum(salary) as TotalDeptSalary from emp group by dno 
 
----4th Query--
+---4th Query---------------------------------------------------------------------------------------------------------------
+
+-- WHICH DEPT DOES NOT EXISTS ANY EMP THOSE DETAILS?
 
 select dname from dept where dno not in (select dno from emp)
 
----5th Query--
+---5th Query---------------------------------------------------------------------------------------------------------------
 --nth Query--
+
+--LIST 5TH MINIMUM SALARY EMP DETAILS USING NTH QUERY METHOD
+
 select * from emp e where 3=(select count (distinct salary) as minsalary from emp where salary<e.salary)
 
 select salary from emp order by salary
 
 
---6th Query--
+--6th Query---------------------------------------------------------------------------------------------------------------
+
+--LIST WHICH EMPLOYEES TWO SALARIES ARE SAME
+
 --self Join--
 
 select distinct  e.salary,e.ename from emp e ,emp r where e.salary=r.salary and e.eid!=r.eid
@@ -86,10 +101,11 @@ select distinct  e.salary,e.ename from emp e ,emp r where e.salary=r.salary and 
 select * from emp
 
 
+--7th Query---------------------------------------------------------------------------------------------------------------
 
---7th Query--
+--INSERT EMP DETAILS USING PROCEDURE IF EID IS UNIQUE,ENAME IS NOT NULL,SALARY GREATER THAN 12000 ?
 
-alter procedure p2 (@eid int,@ename varchar(20),@sal int,@dno int)
+create procedure p2 (@eid int,@ename varchar(20),@sal int,@dno int)
 as 
 begin
 set nocount on
@@ -119,7 +135,9 @@ select name from sysobjects where xtype='p'
 
 select * from emp
 
----8th Query--
+---8th Query---------------------------------------------------------------------------------------------------------------
+
+-- LIST EMP MONTHLYSALARY,ANNUAL SALARY AND SAVE AS VIEW
 
 Create view v1 as select salary,(salary*12) as yearlysal from emp
 
@@ -133,44 +151,62 @@ sp_help v1
 select name from sysobjects where xtype='v'
 
 
---9th Query--
+--9th Query---------------------------------------------------------------------------------------------------------------
 
-
-CREATE TABLE empt(EID INT,ENAME VARCHAR(10) NOT NULL,SALARY INT CHECK (SALARY BETWEEN 10000 AND 50000),DNO INT)
-SELECT *FROM empt
+--CREATE ONE NEW EMPTABLE IN THAT TO STORE INSERTED,DELETED USING TRIGGER.
 
 ---Trigger for Inserting The Records
 
-CREATE TRIGGER tr
-ON EMP
-FOR INSERT
-AS
-BEGIN
-INSERT INTO empt SELECT EID,ENAME,SALARY,DNO FROM INSERTED  
-END
-INSERT INTO EMP(EID,ENAME,SALARY,DNO) VALUES(1,'john',30000,10) 
-INSERT INTO EMP(EID,ENAME,SALARY,DNO) VALUES(134,'hary',25000,10)
-SELECT *FROM EMP
+---create a new table for inserting when tirggered
+
+CREATE TABLE EMPNEW(EID INT,ENAME VARCHAR(10) NOT NULL,SALARY INT CHECK(SALARY BETWEEN 10000 AND 50000),DNO INT)
+SELECT *FROM EMPNEW
+
+----trigger program
+
+go
+create trigger tr1 on EMP ---creating the trigger
+for insert---using the  for/after tirgger
+as
+set nocount on
+declare @eid int,@ename varchar(20),@sal int,@dn int--declaring the variables
+select @eid=i.eid from inserted i--selecting the values and setting them from inserted temporary table
+select @ename=i.ename from inserted i
+select @sal=i.salary from inserted i
+set @dn=90
+insert into empnew values(@eid,@ename,@sal,@dn)--automatically inserting the values into the EMPNEW table when inserted in EMP table
+print 'triggered after insertion' ---printing the statement
+go
+
+insert into emp values(13,'sutrig',19000,60)----when we insert in this EMP then trigger will run every time and EMPNEW will be affected
+
+select * from empnew
 
 
-CREATE TABLE EMP3(EID INT,ENAME VARCHAR(10) NOT NULL,SALARY INT CHECK(SALARY BETWEEN 10000 AND 50000),DNO INT)
-SELECT *FROM EMP3
 
 --Trigger for Deleting the Records
-CREATE TRIGGER TR5 
+
+go
+create TRIGGER tr2	--creating the trigger
 ON EMP
-FOR DELETE
+FOR DELETE	--using the FOR/After trigger
 AS
-BEGIN
-INSERT INTO EMP3 SELECT EID,ENAME,SALARY,DNO FROM DELETED
-END
-DELETE FROM EMP WHERE EID=134 
-SELECT *FROM EMP  
+declare @eno int	--declaring the enumber
+select @eno=d.eid from deleted d	--Selecting the eid From deleted temp tables
+DELETE FROM EMPNEW WHERE EID=@eno	---deleting inthe EMPNEW table when deleted int EMP
+print 'Deleted successfully triggered'
+
+---automatic deleting in the EMPNEW table when you deleting the values in the EMP means tirggered
+delete from emp where eid=13
+
+SELECT *FROM empnew
 
 
---10 Query--
+--10 Query-------------------------------------------------------------------------------------------------------------
 
----Scalar Function
+--TO MAKE TAX()FUNCTION FOR GIVEN SALARY WITH 13%
+
+---Scalar Function--used to return single values
 alter function f1(@sal int)
 returns float
 as 
@@ -182,11 +218,12 @@ end
 
 select dbo.f1(50000)
 
----tabular function
-create function tax(@eno int)
-returns table
+---TABULAR FUNCTION ---returns the table
+
+create function tax(@eno int) ---creating the function
+returns table  ---returns the table
 as
-return (select eid,ENAME,salary*12 as yearlysal,(salary-(salary*0.13)) as TAX  from EMP where eid=@eno )
+return (select eid,ENAME,salary*12 as yearlysal,(salary-(salary*0.13)) as TAX  from EMP where eid=@eno ) ---calculating the tax 
 
 select * from dbo.tax(1)
 

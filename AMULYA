@@ -50,12 +50,14 @@ insert into empProject values (3,104)
 select * from empProject
 
 --- 1ST QUERY
+--TO GET ALL EMP,DEPT DETAILS WHICH DEPT ATLEAST 1 OR MORE EMPLOYEES
 
 selecT * from emp e where dno  in (select dno from dept where dno=e.dno) 
 select * from emp 
 select * from dept 
 
 --2ND QUERY-- 
+--TO GET ALL EMP,PROJECT DETAILS WHICH EMP ID MATCH WITH PROJECT ID
 
 select e.ename,e.eid,e.dno,p.PID,p.PNAME from emp e, PROJECTS p where eid in 
 (select eid from empProjects where eid=e.eid and PID=p.PID)
@@ -63,12 +65,14 @@ select e.ename,e.eid,e.dno,p.PID,p.PNAME from emp e, PROJECTS p where eid in
 select * from empProjects
 
 ---3RD QUERY--
+--TO GET TOTAL SUM OF SALARIES BASED ON DEPT WISE
 
-select dno,sum(salary) as TotalDeptSalary from emp group by dno 
+SELECT DNO,SUM(SALARY) AS TOTALDEPTSALARY FROM EMP GROUP BY DNO
 
 ---4TH QUERY--
+--TO GET DETAILS OF DEPT THAT DOESNOT HAVE ANY EMPLOYEE
 
-select dname from dept where dno not in (select dno from emp)
+SELECT DNAME FROM DEPT WHERE DNO NOT IN (SELECT DNO FROM EMP)
 
 --5TH QUERY
 --LIST 5TH MINIMUM SALARY EMP DETAILS USING NTH QUERY METHOD
