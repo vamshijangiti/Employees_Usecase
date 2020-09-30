@@ -79,9 +79,6 @@ Select * from EMPSPROJTABLE
 
 
 --Getting employee and dept tables where which dept is having 1 or more employees using EXISTS keyword
-SELECT * FROM EMPLOYEE E,DPTS D WHERE EXISTS(SELECT 1 FROM DPTS,EMPLOYEE WHERE D.DEPTNO=E.DEPTNO)
-
---(OR)
 
 SELECT *FROM EMPLOYEE E WHERE EXISTS(SELECT DEPTNO FROM DPTS D WHERE D.DEPTNO=E.DEPTNO)
 
@@ -116,10 +113,6 @@ SELECT * FROM EMP E
 WHERE 4=(SELECT COUNT(DISTINCT SALARY) FROM EMPLOYEE WHERE SALARY>E.SALARY)
 -----------------------------------------------------------------------------
 --6)List which emps two salaries are same.
-
-SELECT ENAME,SALARY
-FROM EMPLOYEE 
-WHERE SALARY IN (SELECT SALARY FROM EMPLOYEE GROUP BY SALARY HAVING COUNT(*) > 1)
 
 --Using self join
 select distinct e.SALARY, a.ENAME from EMPLOYEE e ,EMPLOYEE a where e.SALARY=a.SALARY and e.EID!=a.EID
