@@ -57,7 +57,7 @@ sp_help 'EMPSPROJTABLE'
 Select * from EMPSPROJTABLE
 
 --ques no:1
-SELECT * FROM EMPS E,DPTS D WHERE EXISTS(SELECT 1 FROM DPTS,EMPS WHERE D.DEPTNO=E.DEPTNO)--by using alias names we are getting all the details of emp and dept which dept exists atleast one emp 
+SELECT * FROM EMPS E,DPTS D WHERE EXISTS(SELECT 1 FROM DPTS,EMPS WHERE D.DEPTNO=E.DEPTNO)-- we are getting all the details of emp and dept which dept exists atleast one emp 
 --ques no:2
 SELECT E.EID,E.ENAME,E.DEPTNO,P.PID,P.PNAME FROM EMPS E,PROJTABLE P WHERE EID IN
 (SELECT EID FROM EMPSPROJTABLE WHERE EID=E.EID AND PID=P.PID)--- getting all the details of emp and projects table by checking eid in and using empsprojectable we are matching the eid and pid
