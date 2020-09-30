@@ -1,6 +1,8 @@
 --FIRST TABLE FOR EMP
 
+--Creation of employee table by checking constraints
 CREATE TABLE EMPLOYEE(EID INT UNIQUE NOT NULL,ENAME VARCHAR(10) NOT NULL,SALARY INT CHECK(SALARY>=10000 and SALARY<=50000),DEPTNO INT FOREIGN KEY REFERENCES EMPS(DEPTNO))
+ --inserting values into employee table
 INSERT INTO EMPLOYEE VALUES(1,'Ammu',20000,10)
 INSERT INTO EMPLOYEE VALUES(2,'Manasa',10000,20)
 INSERT INTO EMPLOYEE VALUES(3,'Deekshitha',30000,30)
@@ -10,15 +12,20 @@ INSERT INTO EMPLOYEE VALUES(6,'Dhanasri',35000,30)
 INSERT INTO EMPLOYEE VALUES(7,'Archana',45000,40)
 update EMPLOYEE set SALARY=20000 where EID=2
 
+--To get the desciption of table
 sp_help 'EMPLOYEE'
+--To get the information of table
 Select * from EMPLOYEE
 
+------------------------------------------------------------------------------------------------------
 
 
+--SECOND TABLE FOR DEPARTMENT
 
---SECOND TABLE FOR DPTS
-
+--Creation of dpts table by checking constraints
 CREATE TABLE DPTS(DEPTNO INT PRIMARY KEY ,DNAME VARCHAR(10) NOT NULL,LOCATION VARCHAR(20) CHECK(LOCATION IN('IND','USA','UK')))
+
+--inserting values into table
 INSERT INTO DPTS VALUES(10,'ADMIN','IND')
 INSERT INTO DPTS VALUES(20,'HR','UK')
 INSERT INTO DPTS VALUES(30,'STAFF','IND')
@@ -26,25 +33,40 @@ INSERT INTO DPTS VALUES(40,'ADMIN','USA')
 INSERT INTO DPTS VALUES(50,'HR','UK')
 INSERT INTO DPTS VALUES(60,'STAFF','USA')
 INSERT INTO DPTS VALUES(70,'HR','UK')
-sp_help 'DPTS'
-Select * from DPTS
 
+--To get the description of table
+sp_help 'DPTS'
+--To get the records from dpts tale
+Select * from DPTS
+-----------------------------------------------------------------------------------------------------------------------
 
 --THIRD TABLE FOR PROJTABLE
 
+--Creation of projtable table by checking constraints
 CREATE TABLE PROJTABLE(PID INT PRIMARY KEY,PNAME VARCHAR(10) NOT NULL)
+--inserting valuyes into table
 INSERT INTO PROJTABLE VALUES(100,'DOTNET')
 INSERT INTO PROJTABLE VALUES(1,'SQL')
 INSERT INTO PROJTABLE VALUES(120,'JAVA')
 INSERT INTO PROJTABLE VALUES(130,'C++')
 INSERT INTO PROJTABLE VALUES(140,'C')
 INSERT INTO PROJTABLE VALUES(150,'PYTHON')
+
+--To get the desciption of table
 sp_help 'PROJTABLE'
+
+--To get the records of table
 Select * from PROJTABLE
+--------------------------------------------------------------------------------------------------------------------------------------
+
 
 --FOURTH TABLE FOR EMPSPROJTABLE
 
+
+----Creation of empprojtable table by checking constraints
+
 CREATE TABLE EMPSPROJTABLE(EID INT FOREIGN KEY REFERENCES EMPS(EID),PID INT FOREIGN KEY REFERENCES PROJTABLE(PID))
+--inserting values into table
 INSERT INTO EMPSPROJTABLE VALUES(1,100)
 INSERT INTO EMPSPROJTABLE VALUES(2,120)
 INSERT INTO EMPSPROJTABLE VALUES(3,130)
