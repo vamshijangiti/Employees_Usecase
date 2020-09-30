@@ -1,10 +1,7 @@
-///////----------Manasa-----------////////
-
-
---1)FIRST TABLE FOR EMPLOYEE
+--FIRST TABLE FOR EMP
 
 CREATE TABLE EMPLOYEE(EID INT UNIQUE NOT NULL,ENAME VARCHAR(10) NOT NULL,SALARY INT CHECK(SALARY>=10000 and SALARY<=50000),DEPTNO INT FOREIGN KEY REFERENCES EMPS(DEPTNO))
-INSERT INTO EMPLOYEE VALUES(1,'Ammu',20000,10)                    --Inserting values into EMPLOYEE table
+INSERT INTO EMPLOYEE VALUES(1,'Ammu',20000,10)
 INSERT INTO EMPLOYEE VALUES(2,'Manasa',10000,20)
 INSERT INTO EMPLOYEE VALUES(3,'Deekshitha',30000,30)
 INSERT INTO EMPLOYEE VALUES(4,'Gayathri',40000,30)
@@ -13,97 +10,100 @@ INSERT INTO EMPLOYEE VALUES(6,'Dhanasri',35000,30)
 INSERT INTO EMPLOYEE VALUES(7,'Archana',45000,40)
 update EMPLOYEE set SALARY=20000 where EID=2
 
-sp_help 'EMPLOYEE'            --Description of EMPLOYEE table
-Select * from EMPLOYEE        --Displays the whole data in the table
+sp_help 'EMPLOYEE'
+Select * from EMPLOYEE
 
--------------------------------------------------------------------------------
 
---2)SECOND TABLE FOR DPTS
 
-CREATE TABLE DPTS(DEPTNO INT PRIMARY KEY ,DNAME VARCHAR(10) NOT NULL,LOCATION VARCHAR(20) CHECK(LOCATION IN('IND','USA','UK')))  --Creating table named DPTS
-INSERT INTO DPTS VALUES(10,'ADMIN','IND')  --Inserting values into DPTS table
+
+--SECOND TABLE FOR DPTS
+
+CREATE TABLE DPTS(DEPTNO INT PRIMARY KEY ,DNAME VARCHAR(10) NOT NULL,LOCATION VARCHAR(20) CHECK(LOCATION IN('IND','USA','UK')))
+INSERT INTO DPTS VALUES(10,'ADMIN','IND')
 INSERT INTO DPTS VALUES(20,'HR','UK')
 INSERT INTO DPTS VALUES(30,'STAFF','IND')
 INSERT INTO DPTS VALUES(40,'ADMIN','USA')
 INSERT INTO DPTS VALUES(50,'HR','UK')
 INSERT INTO DPTS VALUES(60,'STAFF','USA')
 INSERT INTO DPTS VALUES(70,'HR','UK')
-
-sp_help 'DPTS'        --Desciption of DPTS table
-Select * from DPTS    --Displays the whole data in the table
-
---------------------------------------------------------------------------
+sp_help 'DPTS'
+Select * from DPTS
 
 
---3)THIRD TABLE FOR PROJTABLE
+--THIRD TABLE FOR PROJTABLE
 
-CREATE TABLE PROJTABLE(PID INT PRIMARY KEY,PNAME VARCHAR(10) NOT NULL)         --Creating table called PROJTABLE
-INSERT INTO PROJTABLE VALUES(100,'DOTNET')                                    --Inserting values into PROJTABLE 
+CREATE TABLE PROJTABLE(PID INT PRIMARY KEY,PNAME VARCHAR(10) NOT NULL)
+INSERT INTO PROJTABLE VALUES(100,'DOTNET')
 INSERT INTO PROJTABLE VALUES(1,'SQL')
 INSERT INTO PROJTABLE VALUES(120,'JAVA')
 INSERT INTO PROJTABLE VALUES(130,'C++')
 INSERT INTO PROJTABLE VALUES(140,'C')
 INSERT INTO PROJTABLE VALUES(150,'PYTHON')
+sp_help 'PROJTABLE'
+Select * from PROJTABLE
 
-sp_help 'PROJTABLE'                --Desciption of PROJTABLE table
-Select * from PROJTABLE               --Displays the whole data in the table
+--FOURTH TABLE FOR EMPSPROJTABLE
 
--------------------------------------------------------------------------------------------
-
---4)FOURTH TABLE FOR EMPSPROJTABLE
-
-CREATE TABLE EMPSPROJTABLE(EID INT FOREIGN KEY REFERENCES EMPS(EID),PID INT FOREIGN KEY REFERENCES PROJTABLE(PID))  --Creating table named EMPSPROJTABLE
-INSERT INTO EMPSPROJTABLE VALUES(1,100)  --Inserting values into table
+CREATE TABLE EMPSPROJTABLE(EID INT FOREIGN KEY REFERENCES EMPS(EID),PID INT FOREIGN KEY REFERENCES PROJTABLE(PID))
+INSERT INTO EMPSPROJTABLE VALUES(1,100)
 INSERT INTO EMPSPROJTABLE VALUES(2,120)
 INSERT INTO EMPSPROJTABLE VALUES(3,130)
 INSERT INTO EMPSPROJTABLE VALUES(5,150)
+sp_help 'EMPSPROJTABLE'
+Select * from EMPSPROJTABLE
 
-sp_help 'EMPSPROJTABLE'                 --Desciption of EMPSPROJTABLE table
-Select * from EMPSPROJTABLE            --Displays the whole data in the table
-
-
--------------------------------------------------------------------------------------
-
+--------------------------------------
 --1)List all the emp,depts Details which dept at least 1 or more employees.
 
-SELECT *FROM EMPLOYEE E WHERE DEPTNO IN(SELECT DEPTNO FROM DPTS WHERE DEPTNO=E.DEPTNO)
-SELECT *FROM EMPLOYEE
-SELECT *FROM DPTS WHERE DEPTNO NOT IN(SELECT DEPTNO FROM EMPLOYEE)
-SELECT *FROM DPTS
 
-------------------------------------------------------------------------------------------------
+--Getting employee and dept tables where which dept is having 1 or more employees using EXISTS keyword
+SELECT * FROM EMPLOYEE E,DPTS D WHERE EXISTS(SELECT 1 FROM DPTS,EMPLOYEE WHERE D.DEPTNO=E.DEPTNO)
+
+--(OR)
+
+SELECT *FROM EMPLOYEE E WHERE EXISTS(SELECT DEPTNO FROM DPTS D WHERE D.DEPTNO=E.DEPTNO)
+
+
+-------------------------------------------------------------------------------
 --2)List all Emp,Project details which emp id match with project id.
+
+--Getting employee,project details by checking the condition of employee id matches with project id
 
 SELECT EMPLOYEE.*,PROJTABLE.* FROM EMPLOYEE,PROJTABLE WHERE EMPLOYEE.EID=PROJTABLE.PID
 
-------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------
 --3)To get total sum of salaries based on dept no wise.
 
-
+--Getting total salary of an employee by using aggregate function and also using special clauses group by,rollup to get deptnumber wise
 select DEPTNO,SUM(SALARY) AS TOTALSALARY FROM EMPLOYEE GROUP BY DEPTNO WITH ROLLUP
 
 ----------------------------------------------------------------------------------
-
 --4)Which dept does not exists any employee those details?
 
-select DNAME from DPTS where DEPTNO not in (select DEPTNO from EMPLOYEE)
+--Getting employee details where which deptnumber doesnot have any employee
+select DEPTNO from DPTS where DEPTNO not in (select DEPTNO from EMPLOYEE)
 
 
 -------------------------------------------------------------------------------------
 
 --5)List  5Th minimum salary emp details using ‘n’ query method?
 
+--Getting 5th minimum salary of an employee using subquery
+
 SELECT * FROM EMP E
 WHERE 4=(SELECT COUNT(DISTINCT SALARY) FROM EMPLOYEE WHERE SALARY>E.SALARY)
-
-----------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------
 --6)List which emps two salaries are same.
 
-SELECT ENAME
+SELECT ENAME,SALARY
 FROM EMPLOYEE 
 WHERE SALARY IN (SELECT SALARY FROM EMPLOYEE GROUP BY SALARY HAVING COUNT(*) > 1)
 
----------------------------------------------------------------------------------------------------
+--Using self join
+select distinct e.SALARY, a.ENAME from EMPLOYEE e ,EMPLOYEE a where e.SALARY=a.SALARY and e.EID!=a.EID
+
+select * from emp
+------------------------------------------------------------------------------
 --7)Insert emp details using procedure if eid is unique,ename is not null,sal is more than 12000?
 
 CREATE PROC PCI(@EID INT,@ENAME VARCHAR(10),@SALARY INT )   -- PROCEDURE NAMED AS PC
@@ -132,33 +132,54 @@ EXEC PCI 106,'Keerthana',400 -- CANT INSERT SALARY SHOULD BE GREATER THAN 12000
 EXEC PCI 1010,NULL,12999  -- CANT INSERT NULL VALUE INTO ENAME
 EXEC PCI 2,'Ammu',12111  --- EID 2 ALREADY EXISTS
 
------------------------------------------------------------------------------------------------------
+sp_help 'PCI'
+select name from sysobjects where xtype='p'
+-----------------------------------------------------------------
 --8)List emp monthly salary,annual salary and save as “view”
 
-create view v as select emp.ENAME,emp.SALARY as monthlysalary,emp.SALARY*12 as annualsalary from emp 
+--Getting salary and annual salary of an employee by creating view
+create view v 
+as select emp.ENAME,emp.SALARY as monthlysalary,emp.SALARY*12 as annualsalary from emp 
 
 select * from v
 
------------------------------------------------------------------------------------------------------
-
+---------------------------------------------------------------------
 ----9)Create one new emptable in that to store inserted,deleted details using trigger.
 
-------------------------------------------------------------------------------------------------------------
-
---10)To make tax() function for given salary with 13%.
-
-create function tax(@SALARY int)    --Creating function called tax
-returns float
+create table empbackup(eno int,ename varchar(10))  --creating table called empbackup
+go
+create trigger t1   --creation of trigger t1 on employee table
+on EMPLOYEE
+for insert,delete  --DML events
 as
 begin
-set @SALARY=@SALARY+(@SALARY*0.13)     --Calculating tax
-return @SALARY
+select * from EMPLOYEE
+insert into empbackup select EID,ename from inserted     --inserting values into empbackup table and we can store that in virtual table that is inserted
+insert into empbackup select EID,ename from deleted       --deleting values from empbackup table and we can store that in virtual table that is deleted
 end
-select dbo.tax(5000)                    --Selecting result
+go
+insert into EMPLOYEE(EID,ename)values(100,'Manasaa')       --insertion of values
+delete from EMPLOYEE where EID=2                          --deletion of values
+
+select * from empbackup
+
+--Desciption of trigger t1
+sp_help 't1'
+
+--To get available triggers in database
+select name from sysobjects where xtype='tr'
 
 
-
-
+---------------------------------------------------------------
+--10)To make tax() function for given salary with 13%.
+create function tax(@SALARY int)            --Creating a function called tax
+returns float                                --returns datatype
+as
+begin
+set @SALARY=@SALARY+(@SALARY*0.13)           --calculating tax
+return @SALARY                               --returns the salary after calculating tax
+end
+select dbo.tax(5000)                          --To calculate the tax for particulary salary of an employee
 
 
 
