@@ -1,4 +1,3 @@
-
 --CREATING A DATABASE
 CREATE DATABASE CASESTUDY
 USE CASESTUDY
@@ -27,18 +26,29 @@ SELECT *FROM EMPPROJECTS
 --Q1...
 --TO GET ALL EMP,DEPT DETAILS WHICH DEPT ATLEAST 1 OR MORE EMPLOYEES
 SELECT *FROM EMPS E WHERE EXISTS(SELECT DNO FROM DEPTS WHERE DNO=E.DNO)
+--employee details will be selected if there exists records where deptno 
+--from emp table equals to deptno from dept table.
 
+--------------------------------------------------------------------------
+--------------------------------------------------------------------------
 
 --Q2...
 --TO GET ALL EMP,PROJECT DETAILS WHICH EMP ID MATCH WITH PROJECT ID
  SELECT EMPS.*,PROJECT.* FROM EMPS INNER JOIN PROJECT
 ON EMPS.EID=PROJECT.PID
+--emp and project details will be selected if there are matching records from 
+--emp table and project table.
 
+--------------------------------------------------------------------------
+--------------------------------------------------------------------------
 
 --Q3..
 --TO GET TOTAL SUM OF SALARIES BASED ON DEPT WISE
  SELECT DNO,SUM(SALARY) AS TOTAL_SAL FROM EMPS GROUP BY DNO
+ --sum of salaries from emp table will be selected based on dept wise
 
+--------------------------------------------------------------------------
+-------------------------------------------------------------------------
 
 --Q4...
 --TO GET DETAILS OF DEPT THAT DOESNOT HAVE ANY EMPLOYEE
@@ -47,19 +57,34 @@ ON DEPTS.DNO=EMPS.DNO
 EXCEPT
 SELECT DEPTS.DNO,DEPTS.DNAME,EMPS.ENAME FROM DEPTS INNER JOIN EMPS
 ON DEPTS.DNO=EMPS.DNO
+--full join will select both matching and unmatching records whereas inner join 
+--will select only matching records. Except operator is used to get all records
+--from first select statement except matching records from second select statement.
+
+--------------------------------------------------------------------------
+--------------------------------------------------------------------------
 
 
 --Q5...
 --TO GET 5TH MAXIMUM SALARY EMP DETAILS USING NTH QUERY
-SELECT *FROM EMPS E WHERE 4=(SELECT COUNT(DISTINCT SALARY) FROM EMPS WHERE SALARY<E.SALARY)
+SELECT *FROM EMPS E WHERE 4=(SELECT COUNT(DISTINCT SALARY) FROM EMPS WHERE
+ SALARY<E.SALARY)
+--details of emps will be selected where distinct salary from emps table will be 
+--counted 4 times where each salary will be compared.
 
+--------------------------------------------------------------------------
+--------------------------------------------------------------------------
 
 --Q6....
 --TO GET EMP DETAILS WHOSE SALARIES ARE SAME
  SELECT *FROM EMPS E WHERE 1<(SELECT COUNT(*) FROM EMPS WHERE SALARY=E.SALARY)
  UPDATE EMPS SET SALARY=40000 WHERE ENAME='PALLAVI'
  SELECT *FROM EMPS
+ --emps details will be selected by comparing salaries of emps. If any two
+ --salaries are same, then those salaries are selected.
 
+--------------------------------------------------------------------------
+--------------------------------------------------------------------------
 
 --Q7...
 --TO INSERT EMP DETAILS USING PROCEDURE IF EID IS UNIQUE,ENAME IS NOT NULL AND 
@@ -70,6 +95,7 @@ BEGIN
 SET NOCOUNT ON
 DECLARE @I INT,@J INT
 SELECT @I=COUNT(*) FROM EMPS WHERE EID=@ENO
+
 SELECT @J=COUNT(*) FROM EMPS WHERE DNO=@DNO
 IF(@I>0)
   PRINT 'EID SHOULD BE UNIQUE'
@@ -88,11 +114,16 @@ END
      EXEC P1 60,'AMULYA',45000,30
 	 SELECT *FROM EMPS
 
+--------------------------------------------------------------------------
+--------------------------------------------------------------------------
 
 --Q8...
 --TO GET EMP MONTHLY SAL AND ANNUAL SAL AND SAVE AS VIEW
  CREATE VIEW VV AS SELECT SALARY M_SAL,(SALARY*12) A_SAL FROM EMPS
  SELECT * FROM VV
+
+--------------------------------------------------------------------------
+--------------------------------------------------------------------------
 
 --Q9..
 --TO CREATE ONE NEW EMPTABLE TO STORE INSERTED,DELETED DETAILS USING TRIGGER 
@@ -120,6 +151,8 @@ END
      DELETE FROM EMPS WHERE ENAME='AKHILA'
 	 SELECT *FROM EMPTABLE
 
+--------------------------------------------------------------------------
+--------------------------------------------------------------------------
  
  --Q10...
  --TO MAKE TAX() FUNCTION FOR GIVEN SALARY WITH 13%
@@ -130,4 +163,5 @@ BEGIN
 SET @SAL=@SAL+(@SAL*0.13) 
 RETURN @SAL
 END
-   SELECT DBO.TAX(SALARY) FROM EMPS
+   SELECT DBO.TAX(SALARY) FRO
+   M EMPS

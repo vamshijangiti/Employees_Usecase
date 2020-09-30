@@ -38,29 +38,42 @@ sp_help 'EMPSPROJTABLE'
 Select * from EMPSPROJTABLE
 
 --1st QUERY
+--List all the emp,depts Details which dept at least 1 or more employees
+
 select emps.*,dpts.dname,dpts.location from emps,dpts
  where emps.deptno in(select deptno from emps group by emps.deptno having count(emps.deptno)>=1  and emps.deptno=dpts.DEPTNO )
 
 
+--2nd query
+--List all Emp,Project details which emp id match with project id.
 
---2nd QUERY
 select e.ename,e.eid,e.deptno,p.pid,p.pnmae from emps e, projtable p where eid in
 (select eid from empsProjtable where eid=e.eid and pid=p.pid)
 
 --3rd query
+--To get total sum of salaries based on dept no wise.
+
 select deptno,sum(salary)  from emps group by deptno
 
 --4th query
+--Which dept does not exists any employee those details?
+
 select dname from dpts d where not exists (select deptno from emps where deptno=d.deptno)
 
 --5th query
+--List 5Th minimum salary emp details using ‘n’ query method?
+
 select * from emps e where 4=(select count (distinct salary)from emps where salary<e.salary)
 select salary from emps order by salary
 
 --6th query
+--List which emps two salaries are same.
+
 select e.ename,e.salary from emps e where salary in (select salary from emps where eid!=e.eid)
 
---7th query
+---7th query
+--Insert emp details using procedure if eid is unique,ename is not null,sal is more than 12000?
+
 create proc emp(@eid INT,@ename varchar(15),@salary int)
 as
 begin
@@ -72,41 +85,64 @@ else
 	print 'enter valid '
 
 end
+    exec emp 14,'sriya',20000
+	select * from emps  ---to see whether the employee is inserted or not
+
 --8th query
+--List emp monthly salary,annual salary and save as “view”
 
 create view v1
 as select ename,salary,salary*12 as annualsalary from emps
 select *from v1
 
 --9th query
+--Create one new emptable in that to store inserted,deleted details using trigger?
 
-CREATE TABLE EMP2(EID INT,ENAME VARCHAR(10) NOT NULL,SALARY INT CHECK (SALARY BETWEEN 10000 AND 50000),DNO INT) --APPLYING CONSTRAINTS
-SELECT *FROM EMP2
-CREATE TRIGGER TR4 -- TRIGGER NAMED TR4
-ON EMPS
-FOR INSERT
-AS
-BEGIN
-INSERT INTO EMP2 SELECT EID,ENAME,SALARY,DNO FROM INSERTED  
-END
-INSERT INTO EMPS(EID,ENAME,SALARY,DNO) VALUES(133,'ABHIMANYU',30000,10) --INSERTING VALUES INTO NAMED 4 COLOUMNS
-INSERT INTO EMPS(EID,ENAME,SALARY,DNO) VALUES(134,'ABHIJIT',25000,10) -- INSERTING VALUES INTO NAMED 4 COLOUMNS
-SELECT *FROM EMPS
+CREATE TABLE EMPNEW(EID INT,ENAME VARCHAR(10) NOT NULL,SALARY INT CHECK(SALARY BETWEEN 10000 AND 50000),DNO INT)
+SELECT *FROM EMPNEW
 
-CREATE TABLE EMP3(EID INT,ENAME VARCHAR(10) NOT NULL,SALARY INT CHECK(SALARY BETWEEN 10000 AND 50000),DNO INT)
-SELECT *FROM EMP3
-CREATE TRIGGER TR5  -- TRIGGER NAMED TR5
+----trigger program
+
+go
+create trigger tr1 on EMPS---creating the trigger
+for insert---using the  for/after tirgger
+as
+set nocount on
+declare @eid int,@ename varchar(20),@sal int,@dn int--declaring the variables
+select @eid=i.eid from inserted i--selecting the values and setting them from inserted temporary table
+select @ename=i.ename from inserted i
+select @sal=i.salary from inserted i
+set @dn=90
+insert into empnew values(@eid,@ename,@sal,@dn)--automatically inserting the values into the EMPNEW table when inserted in EMP table
+print 'triggered after insertion' ---printing the statement
+go
+
+insert into emps values(13,'sutrig',19000,60)----when we insert in this EMP then trigger will run every time and EMPNEW will be affected
+
+select * from empnew
+
+
+
+--Trigger for Deleting the Records
+
+go
+create TRIGGER tr2	--creating the trigger
 ON EMPS
-FOR DELETE
+FOR DELETE	--using the FOR/After trigger
 AS
-BEGIN
-INSERT INTO EMP3 SELECT EID,ENAME,SALARY,DNO FROM DELETED
-END
-DELETE FROM EMPS WHERE EID=134  -- DELETES  EID RECORD
-SELECT *FROM EMPS   -- RETRIEVE EMPS DETAILS
+declare @eno int	--declaring the enumber
+select @eno=d.eid from deleted d	--Selecting the eid From deleted temp tables
+DELETE FROM EMPNEW WHERE EID=@eno	---deleting inthe EMPNEW table when deleted int EMP
+print 'Deleted successfully triggered'
+
+---automatic deleting in the EMPNEW table when you deleting the values in the EMP means tirggered
+delete from emps where eid=13
+
+SELECT *FROM empnew
 
 
 --10th query
+--To make tax() function for given salary with 13%.
 
 create function tax(@eid int)
 returns float
@@ -121,4 +157,9 @@ end
 declare @a int
 set @a= dbo.tax(1)
 print @a 
+
+
+--for getting all the functions 
+select name from sysobjects where xtype='fn'
+
 
