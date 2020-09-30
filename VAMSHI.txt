@@ -50,6 +50,9 @@ select * from empProjects
 
 
 ---1st query--
+
+-- LIST ALL EMPS,DEPTS DETAILS WHICH DEPT HAS ATLEAST 1 OR MORE EMPLOYEES
+
 selecT * from emp e where dno  in (select dno from dept where dno=e.dno) 
 
 select * from dept where dno not in (select dno from EMP)
@@ -57,28 +60,40 @@ select * from dept where dno not in (select dno from EMP)
 select * from emp 
 select * from dept 
 
----2nd Query-- 
+---2nd Query---------------------------------------------------------------------------------------------------------------
+
+ --LIST ALL EMP,PROJECTS DETAILS WHERE EMPID MATCHES WITH PID
 
 select e.ename,e.eid,e.dno,p.PID,p.PNAME from emp e, PROJECTS p where eid in (select eid from empProjects where eid=e.eid and PID=p.PID)
 
 select * from empProjects
 
----3rd Query--
+---3rd Query---------------------------------------------------------------------------------------------------------------
+
+--TO GET TOTAL SUM OF SALARIES BASED ON DEPTNO WISE
 
 select dno,sum(salary) as TotalDeptSalary from emp group by dno 
 
----4th Query--
+---4th Query---------------------------------------------------------------------------------------------------------------
+
+-- WHICH DEPT DOES NOT EXISTS ANY EMP THOSE DETAILS?
 
 select dname from dept where dno not in (select dno from emp)
 
----5th Query--
+---5th Query---------------------------------------------------------------------------------------------------------------
 --nth Query--
+
+--LIST 5TH MINIMUM SALARY EMP DETAILS USING NTH QUERY METHOD
+
 select * from emp e where 3=(select count (distinct salary) as minsalary from emp where salary<e.salary)
 
 select salary from emp order by salary
 
 
---6th Query--
+--6th Query---------------------------------------------------------------------------------------------------------------
+
+--LIST WHICH EMPLOYEES TWO SALARIES ARE SAME
+
 --self Join--
 
 select distinct  e.salary,e.ename from emp e ,emp r where e.salary=r.salary and e.eid!=r.eid
@@ -86,8 +101,9 @@ select distinct  e.salary,e.ename from emp e ,emp r where e.salary=r.salary and 
 select * from emp
 
 
+--7th Query---------------------------------------------------------------------------------------------------------------
 
---7th Query--
+--INSERT EMP DETAILS USING PROCEDURE IF EID IS UNIQUE,ENAME IS NOT NULL,SALARY GREATER THAN 12000 ?
 
 create procedure p2 (@eid int,@ename varchar(20),@sal int,@dno int)
 as 
@@ -119,7 +135,9 @@ select name from sysobjects where xtype='p'
 
 select * from emp
 
----8th Query--
+---8th Query---------------------------------------------------------------------------------------------------------------
+
+-- LIST EMP MONTHLYSALARY,ANNUAL SALARY AND SAVE AS VIEW
 
 Create view v1 as select salary,(salary*12) as yearlysal from emp
 
@@ -133,8 +151,9 @@ sp_help v1
 select name from sysobjects where xtype='v'
 
 
---9th Query--
+--9th Query---------------------------------------------------------------------------------------------------------------
 
+--CREATE ONE NEW EMPTABLE IN THAT TO STORE INSERTED,DELETED USING TRIGGER.
 
 ---Trigger for Inserting The Records
 
@@ -183,9 +202,11 @@ delete from emp where eid=13
 SELECT *FROM empnew
 
 
---10 Query--
+--10 Query-------------------------------------------------------------------------------------------------------------
 
----Scalar Function
+--TO MAKE TAX()FUNCTION FOR GIVEN SALARY WITH 13%
+
+---Scalar Function--used to return single values
 alter function f1(@sal int)
 returns float
 as 
@@ -197,11 +218,12 @@ end
 
 select dbo.f1(50000)
 
----tabular function
-create function tax(@eno int)
-returns table
+---TABULAR FUNCTION ---returns the table
+
+create function tax(@eno int) ---creating the function
+returns table  ---returns the table
 as
-return (select eid,ENAME,salary*12 as yearlysal,(salary-(salary*0.13)) as TAX  from EMP where eid=@eno )
+return (select eid,ENAME,salary*12 as yearlysal,(salary-(salary*0.13)) as TAX  from EMP where eid=@eno ) ---calculating the tax 
 
 select * from dbo.tax(1)
 
